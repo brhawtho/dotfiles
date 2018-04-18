@@ -16,7 +16,7 @@ go() {
             goto ~
         else
             # find shortest path to directory, go to it
-            dir="$(find ~ -iname $1 | head -n1)"
+            dir="$(find ~ -iname $1 | sort -n | head -n1)"
             if [[ $dir ]]; then
                 goto $dir
             else
