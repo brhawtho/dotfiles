@@ -16,7 +16,7 @@ go() {
             goto ~
         else
             # find shortest path to directory, go to it
-            dir="$(find ~ -iname $1 -print | sort -V | head -n 1)"
+            dir="$(find ~ -iname $1 | head -n1)"
             if [[ $dir ]]; then
                 goto $dir
             else
@@ -33,7 +33,7 @@ go() {
 refresh() {
     go refresh
     cd wallpapers
-    cp "$(ls | sort --random-sort | head -n 1)" ../wallpaper.jpg
+    cp "$(ls | sort --random-sort | head -n1)" ../wallpaper.jpg
     go home
     sqlite3 ~/Library/Application\ Support/Dock/desktoppicture.db "update data set value = '/Users/brycehawthorne/Documents/projects/refresh/wallpaper.jpg'";
     killall Dock
