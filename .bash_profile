@@ -31,11 +31,26 @@ go() {
 # refresh
 # function uses `go` to navigate to refresh repo folder, change background, and return the user home. Reloads the dock.
 refresh() {
+    # navigate to application directory
     go refresh
     cd wallpapers
-    cp "$(ls | sort --random-sort | head -n1)" ../wallpaper.jpg
+
+    if [[ "$1" == "-r" ]]; then
+        # keep going until kill
+        while true; do
+            cp "$(ls | sort --random-sort | head -n1)" ../wallpaper.jpg
+            sqlite3 ~/Library/Application\ Support/Dock/desktoppicture.db "update data set value = '/Users/brycehawthorne/Documents/projects/refresh/wallpaper.jpg'";
+            killall Dock
+            sleep 2.5
+        done
+    else
+        # refresh once
+        cp "$(ls | sort --random-sort | head -n1)" ../wallpaper.jpg
+        sqlite3 ~/Library/Application\ Support/Dock/desktoppicture.db "update data set value = '/Users/brycehawthorne/Documents/projects/refresh/wallpaper.jpg'";
+        killall Dock
+    fi
+
+    # clean up terminal
     go home
-    sqlite3 ~/Library/Application\ Support/Dock/desktoppicture.db "update data set value = '/Users/brycehawthorne/Documents/projects/refresh/wallpaper.jpg'";
-    killall Dock
     clear
 }
