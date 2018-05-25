@@ -5,28 +5,67 @@ alias gcd=cd
 # dir - directory to find and navigate to
 # function will change directory to the shortest path to the named directory, printing the full path when found
 go() {
-    if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-        # display usage if no parameters given
-        echo "usage: go [--help] [dir]"
+    # unset args
+    unset DIR
+    unset HELP
+    unset LIST
+
+    # parse args
+    while [[ $# -gt 0 ]]; do
+        key="$1"
+        case $key in
+            -h|--help)  # print usage
+                HELP=YES
+                shift
+                ;;
+            -l|--list)  # list dir contents
+                LIST=YES
+                shift
+                ;;
+            -?|--*) # unknown option
+                echo "go: $1: invalid option"
+                HELP=YES
+                break
+                ;;
+            *)  # directory
+                DIR="$1"
+                shift
+                ;;
+        esac
+    done
+
+    if [[ "${HELP}" ]]; then # display usage
+        echo "usage: go [-h | --help] [-l | --list] [dir]"
         return
+    fi
+    
+    # else find shortest path to directory
+    if [[ -z "${DIR}" ]]; then
+        dir="${HOME}"
     else
+        dir="$(find ~ -iname ${DIR} | sort -n | head -n1)"
+    fi
+
+    curr="$(pwd)"
+    if [[ "$dir" == "" ]]; then # couldn't find dir
+        echo "go: ${DIR}: No such file or directory"
+        return
+    elif [[ "${dir}" == "${curr}" ]]; then # already in dir
+        echo "go: Already in ${dir}"
+    else # navigate to dir
         echo -e "$(tput setaf 1)leaving  $(tput sgr0)\c" && pwd
-        if [[ "$1" == "home" || $# -eq 0 ]]; then
-            # navigate to user's home
-            gcd ~
-        else
-            # find shortest path to directory, go to it
-            dir="$(find ~ -iname $1 | sort -n | head -n1)"
-            if [[ $dir ]]; then
-                gcd $dir
-            else
-                echo "-bash: go: $1: No such file or directory"
-                return
-            fi
-        fi
+        gcd $dir
         echo -e "$(tput setaf 2)entering $(tput sgr0)\c" && pwd
+    fi
+
+    if [[ "${LIST}" ]]; then # list contents
         ls
     fi
+
+    # unset varables
+    unset DIR
+    unset HELP
+    unset LIST
 }
 
 # refresh
